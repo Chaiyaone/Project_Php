@@ -33,13 +33,13 @@ $count_stmt->close();
 
 // ดึงข้อมูลแจ้งซ่อมโดยใช้ LIMIT
 $sql = "SELECT r.ReportID, r.NameReport, r.Description, r.Picture, r.Created_at, 
-                f.FloorName, d.DormName 
-            FROM reports r
-            JOIN floors f ON r.FloorID = f.FloorID
-            JOIN dorms d ON r.DormID = d.DormID
-            WHERE r.UserID = ?
-            ORDER BY r.Created_at DESC
-            LIMIT ?, ?";
+               f.FloorName, d.DormName 
+        FROM reports r
+        JOIN floors f ON r.FloorID = f.FloorID
+        JOIN dorms d ON r.DormID = d.DormID
+        WHERE r.UserID = ?
+        ORDER BY r.Created_at DESC
+        LIMIT ?, ?";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("iii", $UserID, $offset, $items_per_page);
@@ -100,22 +100,18 @@ $conn->close();
                                 <td><?php echo $row["FloorName"]; ?></td>
                                 <td><?php echo $row["Created_at"]; ?></td>
                                 <td>
-                                    <?php
-                                    $imagePath = "uploads/" . $row["Picture"];
-                                    if (!empty($row["Picture"]) && file_exists($imagePath)) {
-                                    ?>
-                                        <img src="<?php echo $imagePath; ?>" alt="รูปภาพแจ้งซ่อม" class="report-img">
-                                    <?php
-                                    } else {
-                                        echo "ไม่มีรูปภาพ";
-                                    }
-                                    ?>
+                                    <?php if (!empty($row["Picture"])) { ?>
+                                        <img src="uploads/<?php echo $row["Picture"]; ?>" alt="รูปภาพแจ้งซ่อม" class="report-img">
+                                    <?php } else { ?>
+                                        ไม่มีรูปภาพ
+                                    <?php } ?>
                                 </td>
                             </tr>
                         <?php } ?>
                     </tbody>
                 </table>
 
+                <!-- Pagination -->
                 <div class="pagination">
                     <?php if ($page > 1) { ?>
                         <a href="?page=<?php echo $page - 1; ?>" class="page-link">« ก่อนหน้า</a>
