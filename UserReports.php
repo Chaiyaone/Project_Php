@@ -100,23 +100,12 @@ $conn->close();
                                 <td><?php echo $row["FloorName"]; ?></td>
                                 <td><?php echo $row["Created_at"]; ?></td>
                                 <td>
-                                <?php
-                                $imagePath = "uploads/" . $row["Picture"];
-                                if (!empty($row["Picture"]) && file_exists($imagePath)) {
-                                    // เพิ่มการตรวจสอบ MIME type (optional)
-                                    $mime = mime_content_type($imagePath);
-                                    if (strpos($mime, 'image/') !== false) {
-                                ?>
-                                        <img src="<?php echo $imagePath; ?>" alt="รูปภาพแจ้งซ่อม" class="report-img">
-                                <?php
-                                    } else {
-                                        echo "ไม่ใช่ไฟล์รูปภาพ";
-                                    }
-                                } else {
-                                    echo "ไม่มีรูปภาพ";
-                                }
-                                ?>
-                            </td>
+                                    <?php if (!empty($row["Picture"])) { ?>
+                                        <img src="uploads/<?php echo $row["Picture"]; ?>" alt="รูปภาพแจ้งซ่อม" class="report-img">
+                                    <?php } else { ?>
+                                        ไม่มีรูปภาพ
+                                    <?php } ?>
+                                </td>
                             </tr>
                         <?php } ?>
                     </tbody>
