@@ -24,9 +24,14 @@ $FloorID = isset($_POST["FloorID"]) ? intval($_POST["FloorID"]) : 0;
 $DormID = isset($_POST["DormID"]) ? intval($_POST["DormID"]) : 0;
 $Picture = NULL;
 
+// ตรวจสอบและสร้างไดเรกทอรี uploads หากไม่มี
+$targetDir = "../uploads/";
+if (!is_dir($targetDir)) {
+    mkdir($targetDir, 0777, true); // สร้างไดเรกทอรีและตั้งสิทธิ์
+}
+
 // ตรวจสอบว่ามีการอัปโหลดไฟล์รูปภาพหรือไม่
 if (!empty($_FILES["Picture"]["name"])) {
-    $targetDir = "../uploads/";
     $fileName = time() . "_" . basename($_FILES["Picture"]["name"]);
     $targetFilePath = $targetDir . $fileName;
 
@@ -40,13 +45,13 @@ if (!empty($_FILES["Picture"]["name"])) {
 
 // SQL Insert
 $sql = "INSERT INTO reports (NameReport, Description, FloorID, UserID, Picture, DormID) 
-        VALUES (?, ?, ?, ?, ?, ?)";
+          VALUES (?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ssiisi", $NameReport, $Description, $FloorID, $UserID, $Picture, $DormID);
 
 if ($stmt->execute()) {
     echo "บันทึกข้อมูลสำเร็จ";
-    header("Location: ../../Report.php?UserID=" . $user["UserID"]);
+    header("Location: ../../Report.php?UserID=" . $UserID); // ใช้ $UserID จาก session
 } else {
     echo "เกิดข้อผิดพลาด: " . $stmt->error;
 }
