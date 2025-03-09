@@ -101,7 +101,7 @@ $conn->close();
                                 <td><?php echo $row["Created_at"]; ?></td>
                                 <td>
                                     <?php if (!empty($row["Picture"])) { ?>
-                                        <img src="uploads/<?php echo $row["Picture"]; ?>" class="Report-img">
+                                        <img src="Controllers/uploads/<?php echo $row["Picture"]; ?>" class="report-img">
                                     <?php } else { ?>
                                         ไม่มีรูปภาพ
                                     <?php } ?>
