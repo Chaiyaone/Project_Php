@@ -55,6 +55,18 @@ function getDormID($conn) {
 }
 $dorms = getDormID($conn);
 $options = getFloorID($conn); // เรียกใช้ฟังก์ชันก่อนปิด Connection
+
+// ตรวจสอบว่ามีการแจ้งเตือนถูกส่งกลับมาหรือไม่
+$alert_message = "";
+$alert_type = "";
+if (isset($_SESSION['alert_message'])) {
+    $alert_message = $_SESSION['alert_message'];
+    $alert_type = $_SESSION['alert_type'];
+    // ลบข้อมูลแจ้งเตือนออกจาก session หลังจากใช้งานแล้ว
+    unset($_SESSION['alert_message']);
+    unset($_SESSION['alert_type']);
+}
+
 $conn->close();
 ?>
 
@@ -70,6 +82,61 @@ $conn->close();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* เพิ่มสไตล์สำหรับป็อปอัพแจ้งเตือน */
+        .alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .alert-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .alert-box h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .alert-success h3 {
+            color: #2ecc71;
+        }
+        
+        .alert-error h3 {
+            color: #e74c3c;
+        }
+        
+        .alert-box p {
+            margin-bottom: 20px;
+        }
+        
+        .alert-button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        .alert-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 
 <body>
@@ -86,7 +153,7 @@ $conn->close();
     <div class="container">
         <div class="report-container">
             <h1>แบบฟอร์มแจ้งซ่อม</h1>
-            <form action="Controllers/Report/postReport.php" method="post" enctype="multipart/form-data">
+            <form id="reportForm" action="Controllers/Report/postReport.php" method="post" enctype="multipart/form-data">
                 <div class="form-row">
                     <div class="form-group">
                         <label>หมายเลขชั้น/สถานที่ที่ต้องการซ่อม:</label>
@@ -117,6 +184,57 @@ $conn->close();
             </form>
         </div>
     </div>
+
+    <!-- ป็อปอัพแจ้งเตือน -->
+    <div class="alert-overlay" id="alertOverlay">
+        <div class="alert-box" id="alertBox">
+            <h3 id="alertTitle">แจ้งเตือน</h3>
+            <p id="alertMessage"></p>
+            <button class="alert-button" id="alertButton">ตกลง</button>
+        </div>
+    </div>
+
+    <script>
+        // ฟังก์ชันสำหรับแสดงป็อปอัพแจ้งเตือน
+        function showAlert(message, type = 'success') {
+            const alertOverlay = document.getElementById('alertOverlay');
+            const alertBox = document.getElementById('alertBox');
+            const alertTitle = document.getElementById('alertTitle');
+            const alertMessage = document.getElementById('alertMessage');
+            const alertButton = document.getElementById('alertButton');
+
+            alertMessage.textContent = message;
+
+            if (type === 'success') {
+                alertBox.className = 'alert-box alert-success';
+                alertTitle.textContent = 'สำเร็จ';
+            } else {
+                alertBox.className = 'alert-box alert-error';
+                alertTitle.textContent = 'เกิดข้อผิดพลาด';
+            }
+
+            alertOverlay.style.display = 'flex';
+
+            alertButton.onclick = function() {
+                alertOverlay.style.display = 'none';
+                if (type === 'success') {
+                    window.location.href = 'User.php?UserID=<?php echo $_SESSION['UserID']; ?>';
+                }
+            };
+        }
+
+        // ตรวจสอบว่ามีข้อความแจ้งเตือนจาก PHP หรือไม่
+        <?php if (!empty($alert_message)) : ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            showAlert('<?php echo $alert_message; ?>', '<?php echo $alert_type; ?>');
+        });
+        <?php endif; ?>
+
+        // จัดการการส่งแบบฟอร์ม
+        document.getElementById('reportForm').addEventListener('submit', function(event) {
+            // ไม่ต้อง preventDefault() เพื่อให้ฟอร์มยังคงส่งไปยัง postReport.php
+        });
+    </script>
 </body>
 
 </html>
