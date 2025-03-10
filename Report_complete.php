@@ -13,7 +13,7 @@ if ($conn->connect_error) {
 // อนุมัติแจ้งซ่อม
 if (isset($_POST['approve'])) {
     $ReportID = $_POST['ReportID'];
-    $stmt = $conn->prepare("INSERT INTO report_completed (ReportID, NameReport, Description, ReportDate, Picture) SELECT ReportID, NameReport, Description, ReportDate, Picture FROM reports WHERE ReportID = ?");
+    $stmt = $conn->prepare("INSERT INTO report_completed (ReportID, NameReport, Description, ReportDate) SELECT ReportID, NameReport, Description, ReportDate FROM reports WHERE ReportID = ?");
     $stmt->bind_param("i", $ReportID);
     $stmt->execute();
     
@@ -58,7 +58,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 30px;
-            position: relative;
         }
         
         h1, h2 {
@@ -100,7 +99,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
             padding: 12px 15px;
             border-bottom: 1px solid #ddd;
             font-size: 15px;
-            vertical-align: top;
         }
         
         .reports-table tr:hover {
@@ -128,7 +126,9 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
         
         .description-cell {
             max-width: 300px;
-            /* ลบ overflow, text-overflow และ white-space เพื่อให้แสดงข้อความทั้งหมด */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .empty-state {
@@ -189,75 +189,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
             border: 1px solid #27ae60;
         }
         
-        /* เพิ่มสไตล์สำหรับรูปภาพ */
-        .report-image {
-            max-width: 200px;
-            max-height: 150px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 8px;
-            border: 1px solid #ddd;
-        }
-        
-        /* Modal สำหรับแสดงรูปภาพขนาดใหญ่ */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            overflow: auto;
-        }
-        
-        .modal-content {
-            display: block;
-            position: relative;
-            margin: auto;
-            max-width: 90%;
-            max-height: 90%;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        
-        .close {
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        
-        .close:hover,
-        .close:focus {
-            color: #bbb;
-            text-decoration: none;
-        }
-        
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: inline-block;
-            background-color: #34495e;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            font-size: 14px;
-        }
-        
-        .back-button:hover {
-            background-color: #2c3e50;
-        }
-        
         @media (max-width: 768px) {
             .reports-table {
                 display: block;
@@ -270,7 +201,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
             
             h1 {
                 font-size: 24px;
-                margin-top: 30px;
             }
             
             h2 {
@@ -281,25 +211,11 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                 padding: 8px 15px;
                 font-size: 14px;
             }
-            
-            .report-image {
-                max-width: 120px;
-                max-height: 90px;
-            }
-            
-            .back-button {
-                top: 15px;
-                left: 15px;
-                padding: 6px 12px;
-                font-size: 12px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="admin.php" class="back-button">กลับไปหน้าแรก</a>
-        
         <h1>จัดการปัญหาผู้ใช้</h1>
         
         <div class="tab-container">
@@ -316,7 +232,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                         <th>หัวข้อ</th>
                         <th>รายละเอียด</th>
                         <th>วันที่แจ้ง</th>
-                        <th>รูปภาพ</th>
                         <th>จัดการ</th>
                     </tr>
                 </thead>
@@ -328,17 +243,10 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                     <tr>
                         <td><?php echo $row['ReportID']; ?></td>
                         <td><?php echo htmlspecialchars($row['NameReport']); ?></td>
-                        <td class="description-cell">
-                            <?php echo nl2br(htmlspecialchars($row['Description'])); ?>
+                        <td class="description-cell" title="<?php echo htmlspecialchars($row['Description']); ?>">
+                            <?php echo htmlspecialchars($row['Description']); ?>
                         </td>
                         <td><?php echo $row['ReportDate']; ?></td>
-                        <td>
-                            <?php if (!empty($row['Picture'])) { ?>
-                                <img src="<?php echo htmlspecialchars($row['Picture']); ?>" alt="รูปภาพปัญหา" class="report-image" onclick="openImageModal(this.src)">
-                            <?php } else { ?>
-                                <span>ไม่มีรูปภาพ</span>
-                            <?php } ?>
-                        </td>
                         <td>
                             <form method="POST">
                                 <input type="hidden" name="ReportID" value="<?php echo $row['ReportID']; ?>">
@@ -351,7 +259,7 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                     } else {
                     ?>
                     <tr>
-                        <td colspan="6" class="empty-state">ไม่พบข้อมูลการแจ้งซ่อม</td>
+                        <td colspan="5" class="empty-state">ไม่พบข้อมูลการแจ้งซ่อม</td>
                     </tr>
                     <?php } ?>
                 </tbody>
@@ -367,7 +275,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                         <th>หัวข้อ</th>
                         <th>รายละเอียด</th>
                         <th>วันที่แจ้ง</th>
-                        <th>รูปภาพ</th>
                         <th>สถานะ</th>
                     </tr>
                 </thead>
@@ -379,17 +286,10 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                     <tr>
                         <td><?php echo $row['ReportID']; ?></td>
                         <td><?php echo htmlspecialchars($row['NameReport']); ?></td>
-                        <td class="description-cell">
-                            <?php echo nl2br(htmlspecialchars($row['Description'])); ?>
+                        <td class="description-cell" title="<?php echo htmlspecialchars($row['Description']); ?>">
+                            <?php echo htmlspecialchars($row['Description']); ?>
                         </td>
                         <td><?php echo $row['ReportDate']; ?></td>
-                        <td>
-                            <?php if (!empty($row['Picture'])) { ?>
-                                <img src="<?php echo htmlspecialchars($row['Picture']); ?>" alt="รูปภาพปัญหา" class="report-image" onclick="openImageModal(this.src)">
-                            <?php } else { ?>
-                                <span>ไม่มีรูปภาพ</span>
-                            <?php } ?>
-                        </td>
                         <td><span class="status-badge completed">อนุมัติแล้ว</span></td>
                     </tr>
                     <?php 
@@ -397,18 +297,12 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
                     } else {
                     ?>
                     <tr>
-                        <td colspan="6" class="empty-state">ไม่พบข้อมูลการแจ้งซ่อมที่อนุมัติแล้ว</td>
+                        <td colspan="5" class="empty-state">ไม่พบข้อมูลการแจ้งซ่อมที่อนุมัติแล้ว</td>
                     </tr>
                     <?php } ?>
                 </tbody>
             </table>
         </div>
-    </div>
-    
-    <!-- Modal สำหรับแสดงรูปภาพขนาดใหญ่ -->
-    <div id="imageModal" class="modal">
-        <span class="close" onclick="closeImageModal()">&times;</span>
-        <img class="modal-content" id="modalImage">
     </div>
 
     <script>
@@ -428,25 +322,6 @@ $completed_reports = $conn->query("SELECT * FROM report_completed ORDER BY Repor
             
             // Set clicked tab as active
             event.target.classList.add('active');
-        }
-        
-        // เปิด Modal แสดงรูปภาพขนาดใหญ่
-        function openImageModal(src) {
-            document.getElementById('imageModal').style.display = 'block';
-            document.getElementById('modalImage').src = src;
-        }
-        
-        // ปิด Modal
-        function closeImageModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-        
-        // ปิด Modal เมื่อคลิกที่พื้นที่ว่าง
-        window.onclick = function(event) {
-            var modal = document.getElementById('imageModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
         }
     </script>
 </body>

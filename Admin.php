@@ -69,11 +69,7 @@ if (!isset($_SESSION["UserID"])) {
                 <p>ตรวจสอบสถานะการซ่อมบำรุงได้ตลอดเวลา</p>
                 <a href="ManageReports.php?UserID=<?php echo $_SESSION['UserID']; ?>" class="btn">ตรวจสอบสถานะ</a>
             </div>
-            <div class="feature-card">
-                <h2>จัดการปัญหา</h2>
-                <p>ตรวจสอบสถานะการซ่อมบำรุงได้ตลอดเวลา</p>
-                <a href="ManageReports.php?UserID=<?php echo $_SESSION['UserID']; ?>" class="btn">ตรวจสอบสถานะ</a>
-            </div>
+            
         </div>
     </div>
 </body>
