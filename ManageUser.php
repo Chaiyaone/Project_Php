@@ -518,7 +518,7 @@ $result = $conn->query($sql);
                             <td data-label="ชื่อ"><?php echo $row['Name']; ?></td>                 
                             <td data-label="อีเมล"><?php echo $row['Email']; ?></td>
                             <td data-label="สถานะ">
-                                <?php echo (isset($row['isAdmin']) && $row['isAdmin'] == 1) ? 'ผู้ใช้ <span class="admin-badge">ADMIN</span>' : 'ผู้ใช้'; ?>
+                                <?php echo (isset($row['RoleID']) && $row['RoleID'] == 1) ? 'ผู้ใช้ <span class="admin-badge">ADMIN</span>' : 'แอดมิน'; ?>
                             </td>                  
                             <td data-label="จัดการ">                     
                                 <button type="button" class="action-btn edit-btn" 
